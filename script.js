@@ -70,8 +70,7 @@ function salvarRetirada() {
     destino: "Maçiço",
     horaInicial: document.getElementById('horaInicial').value,
     kmInicial: document.getElementById('kmInicial').value,
-    observacao: document.getElementById('obsRetirada').value,
-    timestamp: new Date().toISOString()
+    observacao: document.getElementById('obsRetirada').value
   };
 
   registros.push(entrada);
@@ -87,8 +86,7 @@ function salvarMacico() {
     data: document.getElementById('dataMacico').value,
     origem: document.getElementById('origem-macico').value,
     horaFinal: document.getElementById('horaFinal').value,
-    kmFinal: document.getElementById('kmFinal').value,
-    timestamp: new Date().toISOString()
+    kmFinal: document.getElementById('kmFinal').value
   };
 
   registros.push(entrada);
@@ -97,38 +95,55 @@ function salvarMacico() {
   limparFormularioMacico();
 }
 
-function exportarCSV() {
+function exportarXLSX() {
   if (registros.length === 0) {
     alert("Nenhum dado para exportar.");
     return;
   }
 
-  const cabecalho = [
-    'Tipo', 'Placa', 'Data', 'Escavadeira', 'Origem', 'Destino',
-    'Hora Inicial', 'KM Inicial', 'Hora Final', 'KM Final', 'Observações', 'Timestamp'
+  const dados = [
+    [
+      'Tipo de Formulário',
+      'Escavadeira',
+      'Caminhão',
+      'Origem',
+      'Hora Inicial',
+      'Km Inicial',
+      'Destino',
+      'Hora Final',
+      'Km Final',
+      'Observação'
+    ],
+    ...registros.map(r => [
+      r.tipo || '',
+      r.escavadeira || '',
+      r.placa || '',
+      r.origem || '',
+      r.horaInicial || '',
+      r.kmInicial || '',
+      r.destino || '',
+      r.horaFinal || '',
+      r.kmFinal || '',
+      r.observacao || ''
+    ])
   ];
 
-  const linhas = registros.map(r => [
-    r.tipo || '',
-    r.placa || '',
-    r.data || '',
-    r.escavadeira || '',
-    r.origem || '',
-    r.destino || '',
-    r.horaInicial || '',
-    r.kmInicial || '',
-    r.horaFinal || '',
-    r.kmFinal || '',
-    r.observacao || '',
-    r.timestamp || ''
-  ]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(dados);
 
-  const conteudo = [cabecalho, ...linhas].map(l => l.join(';')).join('\n');
-  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  // aplica negrito e fundo cinza na primeira linha
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let C = range.s.c; C <= range.e.c; ++C) {
+    const cell = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (!ws[cell]) continue;
+    ws[cell].s = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "DDDDDD" } }
+    };
+  }
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'registros_caminhoes.csv';
-  a.click();
+  ws['!cols'] = Array(dados[0].length).fill({ wch: 20 });
+
+  XLSX.utils.book_append_sheet(wb, ws, "Registros");
+  XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
 }
