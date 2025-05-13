@@ -62,7 +62,10 @@
     <video id="video-retirada" autoplay></video>
     <input type="text" id="placa-retirada" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
+    <label>Data</label>
+    <input type="date" id="dataRetirada" required />
     <input type="text" id="escavadeira" placeholder="Escavadeira" required />
+
     <label>Origem</label>
     <select id="origem-retirada" required>
       <option value="">Selecione</option>
@@ -89,6 +92,9 @@
     <video id="video-macico" autoplay></video>
     <input type="text" id="placa-macico" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
+    <label>Data</label>
+    <input type="date" id="dataMacico" required />
+
     <label>Origem</label>
     <select id="origem-macico" required>
       <option value="">Selecione</option>
@@ -109,7 +115,7 @@
   <button onclick="exportarCSV()">Exportar CSV</button>
   <div id="entries"></div>
 
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="zxing.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
