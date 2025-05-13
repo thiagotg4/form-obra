@@ -61,16 +61,29 @@ function limparFormularioMacico() {
 }
 
 function salvarRetirada() {
+  const placa = document.getElementById('placa-retirada').value.trim();
+  const data = document.getElementById('dataRetirada').value;
+  const escavadeira = document.getElementById('escavadeira').value.trim();
+  const origem = document.getElementById('origem-retirada').value;
+  const horaInicial = document.getElementById('horaInicial').value;
+  const kmInicial = document.getElementById('kmInicial').value;
+  const observacao = document.getElementById('obsRetirada').value;
+
+  if (!placa || !data || !escavadeira || !origem || !horaInicial || !kmInicial) {
+    alert("Por favor, preencha todos os campos obrigatórios.");
+    return;
+  }
+
   const entrada = {
     tipo: "jazida",
-    placa: document.getElementById('placa-retirada').value,
-    data: document.getElementById('dataRetirada').value,
-    escavadeira: document.getElementById('escavadeira').value,
-    origem: document.getElementById('origem-retirada').value,
+    placa,
+    data,
+    escavadeira,
+    origem,
     destino: "Maçiço",
-    horaInicial: document.getElementById('horaInicial').value,
-    kmInicial: document.getElementById('kmInicial').value,
-    observacao: document.getElementById('obsRetirada').value
+    horaInicial,
+    kmInicial,
+    observacao
   };
 
   registros.push(entrada);
@@ -80,13 +93,24 @@ function salvarRetirada() {
 }
 
 function salvarMacico() {
+  const placa = document.getElementById('placa-macico').value.trim();
+  const data = document.getElementById('dataMacico').value;
+  const origem = document.getElementById('origem-macico').value;
+  const horaFinal = document.getElementById('horaFinal').value;
+  const kmFinal = document.getElementById('kmFinal').value;
+
+  if (!placa || !data || !origem || !horaFinal || !kmFinal) {
+    alert("Por favor, preencha todos os campos obrigatórios.");
+    return;
+  }
+
   const entrada = {
     tipo: "macico",
-    placa: document.getElementById('placa-macico').value,
-    data: document.getElementById('dataMacico').value,
-    origem: document.getElementById('origem-macico').value,
-    horaFinal: document.getElementById('horaFinal').value,
-    kmFinal: document.getElementById('kmFinal').value
+    placa,
+    data,
+    origem,
+    horaFinal,
+    kmFinal
   };
 
   registros.push(entrada);
