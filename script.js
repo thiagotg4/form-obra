@@ -5,23 +5,23 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
 
-// ao carregar, recupera registros salvos
 window.onload = () => {
   const salvo = localStorage.getItem('registros');
   if (salvo) registros = JSON.parse(salvo);
 };
 
-// abre o formulário desejado
 function abrirFormulario(tipo) {
   document.getElementById('menu-inicial').classList.add('hidden');
 
   if (tipo === 'retirada') {
+    limparFormularioRetirada();
     document.getElementById('form-retirada').classList.remove('hidden');
     leitorRetirada = new ZXing.BrowserQRCodeReader();
     leitorRetirada.decodeFromVideoDevice(null, 'video-retirada', (result, err) => {
       if (result) document.getElementById('placa-retirada').value = result.getText();
     });
   } else {
+    limparFormularioMacico();
     document.getElementById('form-macico').classList.remove('hidden');
     leitorMacico = new ZXing.BrowserQRCodeReader();
     leitorMacico.decodeFromVideoDevice(null, 'video-macico', (result, err) => {
@@ -30,22 +30,41 @@ function abrirFormulario(tipo) {
   }
 }
 
-// voltar ao menu inicial
 function voltarMenu() {
   document.getElementById('menu-inicial').classList.remove('hidden');
   document.getElementById('form-retirada').classList.add('hidden');
   document.getElementById('form-macico').classList.add('hidden');
 
-  // para as câmeras
   if (leitorRetirada) leitorRetirada.reset();
   if (leitorMacico) leitorMacico.reset();
+
+  limparFormularioRetirada();
+  limparFormularioMacico();
 }
 
-// salva formulário de retirada (jazida)
+function limparFormularioRetirada() {
+  document.getElementById('placa-retirada').value = '';
+  document.getElementById('dataRetirada').value = '';
+  document.getElementById('escavadeira').value = '';
+  document.getElementById('origem-retirada').value = '';
+  document.getElementById('horaInicial').value = '';
+  document.getElementById('kmInicial').value = '';
+  document.getElementById('obsRetirada').value = '';
+}
+
+function limparFormularioMacico() {
+  document.getElementById('placa-macico').value = '';
+  document.getElementById('dataMacico').value = '';
+  document.getElementById('origem-macico').value = '';
+  document.getElementById('horaFinal').value = '';
+  document.getElementById('kmFinal').value = '';
+}
+
 function salvarRetirada() {
   const entrada = {
     tipo: "jazida",
     placa: document.getElementById('placa-retirada').value,
+    data: document.getElementById('dataRetirada').value,
     escavadeira: document.getElementById('escavadeira').value,
     origem: document.getElementById('origem-retirada').value,
     destino: "Maçiço",
@@ -58,15 +77,14 @@ function salvarRetirada() {
   registros.push(entrada);
   localStorage.setItem('registros', JSON.stringify(registros));
   alert('Registro salvo!');
-  document.getElementById('form-retirada').reset();
-  document.getElementById('placa-retirada').value = '';
+  limparFormularioRetirada();
 }
 
-// salva formulário de maçiço
 function salvarMacico() {
   const entrada = {
     tipo: "macico",
     placa: document.getElementById('placa-macico').value,
+    data: document.getElementById('dataMacico').value,
     origem: document.getElementById('origem-macico').value,
     horaFinal: document.getElementById('horaFinal').value,
     kmFinal: document.getElementById('kmFinal').value,
@@ -76,11 +94,9 @@ function salvarMacico() {
   registros.push(entrada);
   localStorage.setItem('registros', JSON.stringify(registros));
   alert('Registro salvo!');
-  document.getElementById('form-macico').reset();
-  document.getElementById('placa-macico').value = '';
+  limparFormularioMacico();
 }
 
-// exporta todos os registros em um CSV
 function exportarCSV() {
   if (registros.length === 0) {
     alert("Nenhum dado para exportar.");
@@ -88,13 +104,14 @@ function exportarCSV() {
   }
 
   const cabecalho = [
-    'Tipo', 'Placa', 'Escavadeira', 'Origem', 'Destino',
+    'Tipo', 'Placa', 'Data', 'Escavadeira', 'Origem', 'Destino',
     'Hora Inicial', 'KM Inicial', 'Hora Final', 'KM Final', 'Observações', 'Timestamp'
   ];
 
   const linhas = registros.map(r => [
     r.tipo || '',
     r.placa || '',
+    r.data || '',
     r.escavadeira || '',
     r.origem || '',
     r.destino || '',
