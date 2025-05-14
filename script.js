@@ -2,6 +2,12 @@ let leitorRetirada, leitorMacico;
 let registros = [];
 let exportados = [];
 
+const escavadeirasValidas = [];
+for (let i = 1; i <= 20; i++) {
+  escavadeirasValidas.push(`EHE-${String(i).padStart(3, '0')}`);
+  escavadeirasValidas.push(`EHS-${String(i).padStart(3, '0')}`);
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
@@ -22,9 +28,8 @@ function abrirFormulario(tipo) {
     leitorRetirada = new ZXing.BrowserQRCodeReader();
     leitorRetirada.decodeFromVideoDevice(null, 'video-retirada', (result, err) => {
       if (result) {
-        const texto = result.getText();
-        document.getElementById('placa-retirada').value = texto;
-        setTimeout(() => preencherDataHora('dataRetirada', 'horaInicial'), 100); // aguarda elementos renderizarem
+        document.getElementById('placa-retirada').value = result.getText();
+        setTimeout(() => preencherDataHora('dataRetirada', 'horaInicial'), 100);
       }
     });
   } else if (tipo === 'macico') {
@@ -33,19 +38,17 @@ function abrirFormulario(tipo) {
     leitorMacico = new ZXing.BrowserQRCodeReader();
     leitorMacico.decodeFromVideoDevice(null, 'video-macico', (result, err) => {
       if (result) {
-        const texto = result.getText();
-        document.getElementById('placa-macico').value = texto;
+        document.getElementById('placa-macico').value = result.getText();
         setTimeout(() => preencherDataHora('dataMacico', 'horaFinal'), 100);
       }
     });
   }
 }
 
-
 function preencherDataHora(idData, idHora) {
   const agora = new Date();
   document.getElementById(idData).value = agora.toISOString().split('T')[0];
-  document.getElementById(idHora).value = agora.toTimeString().split(' ')[0].substring(0, 5);
+  document.getElementById(idHora).value = agora.toTimeString().slice(0, 5);
 }
 
 function voltarMenu() {
@@ -68,6 +71,7 @@ function limparFormularioRetirada() {
   document.getElementById('origem-retirada').value = '';
   document.getElementById('destino-retirada').value = 'Maçiço';
   document.getElementById('obsRetirada').value = '';
+  document.getElementById('sugestoes-escavadeira').classList.add('hidden');
 }
 
 function limparFormularioMacico() {
@@ -82,13 +86,18 @@ function salvarRetirada() {
   const placa = document.getElementById('placa-retirada').value.trim();
   const data = document.getElementById('dataRetirada').value;
   const horaInicial = document.getElementById('horaInicial').value;
-  const escavadeira = document.getElementById('escavadeira').value.trim();
+  const escavadeira = document.getElementById('escavadeira').value.trim().toUpperCase();
   const origem = document.getElementById('origem-retirada').value;
   const destino = document.getElementById('destino-retirada').value;
   const observacao = document.getElementById('obsRetirada').value;
 
   if (!placa || !data || !horaInicial || !escavadeira || !origem || !destino) {
     alert("Por favor, preencha todos os campos obrigatórios.");
+    return;
+  }
+
+  if (!escavadeirasValidas.includes(escavadeira)) {
+    alert("Por favor, selecione uma escavadeira válida.");
     return;
   }
 
@@ -149,62 +158,67 @@ function exportarXLSX() {
     incluirAnteriores = confirm("Deseja incluir registros já exportados?");
   }
 
-  let registrosParaExportar;
-
-  if (incluirAnteriores) {
-    registrosParaExportar = [...exportados, ...registros];
-  } else {
-    registrosParaExportar = [...registros];
-    exportados = []; // limpa os antigos
-  }
+  let registrosParaExportar = incluirAnteriores ? [...exportados, ...registros] : [...registros];
+  if (!incluirAnteriores) exportados = [];
 
   const dados = [
     [
-      'Tipo de Formulário',
-      'Data',
-      'Escavadeira',
-      'Caminhão',
-      'Origem',
-      'Hora Inicial',
-      'Destino',
-      'Hora Final',
-      'Observação'
+      'Tipo de Formulário', 'Data', 'Escavadeira', 'Caminhão',
+      'Origem', 'Hora Inicial', 'Destino', 'Hora Final', 'Observação'
     ],
     ...registrosParaExportar.map(r => [
-      r.tipo || '',
-      r.data || '',
-      r.escavadeira || '',
-      r.placa || '',
-      r.origem || '',
-      r.horaInicial || '',
-      r.destino || '',
-      r.horaFinal || '',
-      r.observacao || ''
+      r.tipo || '', r.data || '', r.escavadeira || '', r.placa || '',
+      r.origem || '', r.horaInicial || '', r.destino || '', r.horaFinal || '', r.observacao || ''
     ])
   ];
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(dados);
-
-  const range = XLSX.utils.decode_range(ws['!ref']);
-  for (let C = range.s.c; C <= range.e.c; ++C) {
-    const cell = XLSX.utils.encode_cell({ r: 0, c: C });
-    if (!ws[cell]) continue;
-    ws[cell].s = {
-      font: { bold: true },
-      fill: { fgColor: { rgb: "DDDDDD" } }
-    };
-  }
-
-  ws['!cols'] = Array(dados[0].length).fill({ wch: 20 });
   XLSX.utils.book_append_sheet(wb, ws, "Registros");
   XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
 
   exportados = [...exportados, ...registros];
   localStorage.setItem('exportados', JSON.stringify(exportados));
-
   registros = [];
   localStorage.setItem('registros', JSON.stringify(registros));
 
   alert("Exportação concluída.");
 }
+
+// Autocompletar sugestões
+const inputEscavadeira = document.getElementById('escavadeira');
+const listaSugestoes = document.getElementById('sugestoes-escavadeira');
+
+inputEscavadeira.addEventListener('input', () => {
+  const valor = inputEscavadeira.value.toUpperCase();
+  listaSugestoes.innerHTML = '';
+  if (!valor) {
+    listaSugestoes.classList.add('hidden');
+    return;
+  }
+
+  const filtradas = escavadeirasValidas.filter(e => e.startsWith(valor));
+  if (filtradas.length === 0) {
+    listaSugestoes.classList.add('hidden');
+    return;
+  }
+
+  filtradas.forEach(opcao => {
+    const item = document.createElement('li');
+    item.textContent = opcao;
+    item.addEventListener('click', () => {
+      inputEscavadeira.value = opcao;
+      listaSugestoes.innerHTML = '';
+      listaSugestoes.classList.add('hidden');
+    });
+    listaSugestoes.appendChild(item);
+  });
+
+  listaSugestoes.classList.remove('hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (!inputEscavadeira.contains(e.target) && !listaSugestoes.contains(e.target)) {
+    listaSugestoes.classList.add('hidden');
+  }
+});
