@@ -21,16 +21,30 @@ function abrirFormulario(tipo) {
     document.getElementById('form-retirada').classList.remove('hidden');
     leitorRetirada = new ZXing.BrowserQRCodeReader();
     leitorRetirada.decodeFromVideoDevice(null, 'video-retirada', (result, err) => {
-      if (result) document.getElementById('placa-retirada').value = result.getText();
+      if (result) {
+        const texto = result.getText();
+        document.getElementById('placa-retirada').value = texto;
+        preencherDataHora('dataRetirada', 'horaInicial');
+      }
     });
   } else {
     limparFormularioMacico();
     document.getElementById('form-macico').classList.remove('hidden');
     leitorMacico = new ZXing.BrowserQRCodeReader();
     leitorMacico.decodeFromVideoDevice(null, 'video-macico', (result, err) => {
-      if (result) document.getElementById('placa-macico').value = result.getText();
+      if (result) {
+        const texto = result.getText();
+        document.getElementById('placa-macico').value = texto;
+        preencherDataHora('dataMacico', 'horaFinal');
+      }
     });
   }
+}
+
+function preencherDataHora(idData, idHora) {
+  const agora = new Date();
+  document.getElementById(idData).value = agora.toISOString().split('T')[0];
+  document.getElementById(idHora).value = agora.toTimeString().split(' ')[0].substring(0, 5);
 }
 
 function voltarMenu() {
@@ -48,31 +62,31 @@ function voltarMenu() {
 function limparFormularioRetirada() {
   document.getElementById('placa-retirada').value = '';
   document.getElementById('dataRetirada').value = '';
+  document.getElementById('horaInicial').value = '';
   document.getElementById('escavadeira').value = '';
   document.getElementById('origem-retirada').value = '';
-  document.getElementById('horaInicial').value = '';
-  document.getElementById('kmInicial').value = '';
+  document.getElementById('destino-retirada').value = 'Maçiço';
   document.getElementById('obsRetirada').value = '';
 }
 
 function limparFormularioMacico() {
   document.getElementById('placa-macico').value = '';
   document.getElementById('dataMacico').value = '';
-  document.getElementById('origem-macico').value = '';
   document.getElementById('horaFinal').value = '';
-  document.getElementById('kmFinal').value = '';
+  document.getElementById('origem-macico').value = '';
+  document.getElementById('destino-macico').value = 'Maçiço';
 }
 
 function salvarRetirada() {
   const placa = document.getElementById('placa-retirada').value.trim();
   const data = document.getElementById('dataRetirada').value;
+  const horaInicial = document.getElementById('horaInicial').value;
   const escavadeira = document.getElementById('escavadeira').value.trim();
   const origem = document.getElementById('origem-retirada').value;
-  const horaInicial = document.getElementById('horaInicial').value;
-  const kmInicial = document.getElementById('kmInicial').value;
+  const destino = document.getElementById('destino-retirada').value;
   const observacao = document.getElementById('obsRetirada').value;
 
-  if (!placa || !data || !escavadeira || !origem || !horaInicial || !kmInicial) {
+  if (!placa || !data || !horaInicial || !escavadeira || !origem || !destino) {
     alert("Por favor, preencha todos os campos obrigatórios.");
     return;
   }
@@ -81,11 +95,10 @@ function salvarRetirada() {
     tipo: "jazida",
     placa,
     data,
+    horaInicial,
     escavadeira,
     origem,
-    destino: "Maçiço",
-    horaInicial,
-    kmInicial,
+    destino,
     observacao
   };
 
@@ -98,11 +111,11 @@ function salvarRetirada() {
 function salvarMacico() {
   const placa = document.getElementById('placa-macico').value.trim();
   const data = document.getElementById('dataMacico').value;
-  const origem = document.getElementById('origem-macico').value;
   const horaFinal = document.getElementById('horaFinal').value;
-  const kmFinal = document.getElementById('kmFinal').value;
+  const origem = document.getElementById('origem-macico').value;
+  const destino = document.getElementById('destino-macico').value;
 
-  if (!placa || !data || !origem || !horaFinal || !kmFinal) {
+  if (!placa || !data || !horaFinal || !origem || !destino) {
     alert("Por favor, preencha todos os campos obrigatórios.");
     return;
   }
@@ -111,9 +124,9 @@ function salvarMacico() {
     tipo: "macico",
     placa,
     data,
-    origem,
     horaFinal,
-    kmFinal
+    origem,
+    destino
   };
 
   registros.push(entrada);
@@ -152,10 +165,8 @@ function exportarXLSX() {
       'Caminhão',
       'Origem',
       'Hora Inicial',
-      'Km Inicial',
       'Destino',
       'Hora Final',
-      'Km Final',
       'Observação'
     ],
     ...registrosParaExportar.map(r => [
@@ -165,10 +176,8 @@ function exportarXLSX() {
       r.placa || '',
       r.origem || '',
       r.horaInicial || '',
-      r.kmInicial || '',
       r.destino || '',
       r.horaFinal || '',
-      r.kmFinal || '',
       r.observacao || ''
     ])
   ];
@@ -190,11 +199,9 @@ function exportarXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, "Registros");
   XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
 
-  // Atualiza os registros exportados
   exportados = [...exportados, ...registros];
   localStorage.setItem('exportados', JSON.stringify(exportados));
 
-  // Limpa os registros atuais
   registros = [];
   localStorage.setItem('registros', JSON.stringify(registros));
 
