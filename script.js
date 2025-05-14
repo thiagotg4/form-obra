@@ -132,7 +132,7 @@ function exportarXLSX() {
   let incluirAnteriores = true;
 
   if (temExportados) {
-    incluirAnteriores = confirm("Deseja incluir registros já exportados?");
+    incluirAnteriores = confirm("Deseja também incluir registros já exportados anteriormente? Se sim, confirme. Caso não queira, clique em cancelar.");
   }
 
   let registrosParaExportar;
