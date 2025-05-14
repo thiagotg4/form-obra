@@ -130,8 +130,10 @@ function salvarMacico() {
     return;
   }
 
+  const tipoForm = destino.toLowerCase().replace(' ', '_'); // "Maçiço" -> "maçiço", "Bota Fora" -> "bota_fora"
+
   const entrada = {
-    tipo: "macico",
+    tipo: tipoForm,
     placa,
     data,
     horaFinal,
@@ -144,6 +146,7 @@ function salvarMacico() {
   alert('Registro salvo!');
   limparFormularioMacico();
 }
+
 
 function exportarXLSX() {
   if (registros.length === 0) {
