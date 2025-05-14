@@ -1,6 +1,8 @@
 let leitorRetirada, leitorMacico;
 let registros = [];
 let exportados = [];
+let incluirAnteriores = true;
+let continuarExportacao = false;
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
@@ -129,20 +131,32 @@ function exportarXLSX() {
   }
 
   const temExportados = exportados.length > 0;
-  let incluirAnteriores = true;
 
   if (temExportados) {
-    incluirAnteriores = confirm("Deseja incluir registros já exportados?");
+    document.getElementById("modalExportacao").classList.remove("hidden");
+    continuarExportacao = true;
+    return;
   }
 
-  let registrosParaExportar;
+  realizarExportacao(true);
+}
 
-  if (incluirAnteriores) {
-    registrosParaExportar = [...exportados, ...registros];
-  } else {
-    registrosParaExportar = [...registros];
-    exportados = []; // limpa os antigos
+function responderExportacao(incluir) {
+  incluirAnteriores = incluir;
+  document.getElementById("modalExportacao").classList.add("hidden");
+
+  if (continuarExportacao) {
+    realizarExportacao(incluirAnteriores);
+    continuarExportacao = false;
   }
+}
+
+function realizarExportacao(incluirAnteriores) {
+  let registrosParaExportar = incluirAnteriores
+    ? [...exportados, ...registros]
+    : [...registros];
+
+  if (!incluirAnteriores) exportados = [];
 
   const dados = [
     [
@@ -190,11 +204,9 @@ function exportarXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, "Registros");
   XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
 
-  // Atualiza os registros exportados
   exportados = [...exportados, ...registros];
   localStorage.setItem('exportados', JSON.stringify(exportados));
 
-  // Limpa os registros atuais
   registros = [];
   localStorage.setItem('registros', JSON.stringify(registros));
 
