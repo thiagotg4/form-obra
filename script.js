@@ -1,8 +1,6 @@
 let leitorRetirada, leitorMacico;
 let registros = [];
 let exportados = [];
-let incluirAnteriores = true;
-let continuarExportacao = false;
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
@@ -23,24 +21,14 @@ function abrirFormulario(tipo) {
     document.getElementById('form-retirada').classList.remove('hidden');
     leitorRetirada = new ZXing.BrowserQRCodeReader();
     leitorRetirada.decodeFromVideoDevice(null, 'video-retirada', (result, err) => {
-      if (result) {
-        const now = new Date();
-        document.getElementById('placa-retirada').value = result.getText();
-        document.getElementById('dataRetirada').value = now.toISOString().split('T')[0];
-        document.getElementById('horaInicial').value = now.toTimeString().slice(0, 5);
-      }
+      if (result) document.getElementById('placa-retirada').value = result.getText();
     });
   } else {
     limparFormularioMacico();
     document.getElementById('form-macico').classList.remove('hidden');
     leitorMacico = new ZXing.BrowserQRCodeReader();
     leitorMacico.decodeFromVideoDevice(null, 'video-macico', (result, err) => {
-      if (result) {
-        const now = new Date();
-        document.getElementById('placa-macico').value = result.getText();
-        document.getElementById('dataMacico').value = now.toISOString().split('T')[0];
-        document.getElementById('horaFinal').value = now.toTimeString().slice(0, 5);
-      }
+      if (result) document.getElementById('placa-macico').value = result.getText();
     });
   }
 }
@@ -63,7 +51,7 @@ function limparFormularioRetirada() {
   document.getElementById('escavadeira').value = '';
   document.getElementById('origem-retirada').value = '';
   document.getElementById('horaInicial').value = '';
-  document.getElementById('destino-retirada').value = '';
+  document.getElementById('kmInicial').value = '';
   document.getElementById('obsRetirada').value = '';
 }
 
@@ -72,6 +60,7 @@ function limparFormularioMacico() {
   document.getElementById('dataMacico').value = '';
   document.getElementById('origem-macico').value = '';
   document.getElementById('horaFinal').value = '';
+  document.getElementById('kmFinal').value = '';
 }
 
 function salvarRetirada() {
@@ -79,11 +68,11 @@ function salvarRetirada() {
   const data = document.getElementById('dataRetirada').value;
   const escavadeira = document.getElementById('escavadeira').value.trim();
   const origem = document.getElementById('origem-retirada').value;
-  const destino = document.getElementById('destino-retirada').value;
   const horaInicial = document.getElementById('horaInicial').value;
+  const kmInicial = document.getElementById('kmInicial').value;
   const observacao = document.getElementById('obsRetirada').value;
 
-  if (!placa || !data || !escavadeira || !origem || !destino || !horaInicial) {
+  if (!placa || !data || !escavadeira || !origem || !horaInicial || !kmInicial) {
     alert("Por favor, preencha todos os campos obrigatórios.");
     return;
   }
@@ -94,9 +83,9 @@ function salvarRetirada() {
     data,
     escavadeira,
     origem,
-    destino,
+    destino: "Maçiço",
     horaInicial,
-    horaFinal: "",
+    kmInicial,
     observacao
   };
 
@@ -111,8 +100,9 @@ function salvarMacico() {
   const data = document.getElementById('dataMacico').value;
   const origem = document.getElementById('origem-macico').value;
   const horaFinal = document.getElementById('horaFinal').value;
+  const kmFinal = document.getElementById('kmFinal').value;
 
-  if (!placa || !data || !origem || !horaFinal) {
+  if (!placa || !data || !origem || !horaFinal || !kmFinal) {
     alert("Por favor, preencha todos os campos obrigatórios.");
     return;
   }
@@ -121,12 +111,9 @@ function salvarMacico() {
     tipo: "macico",
     placa,
     data,
-    escavadeira: "",
     origem,
-    destino: "",
-    horaInicial: "",
     horaFinal,
-    observacao: ""
+    kmFinal
   };
 
   registros.push(entrada);
@@ -142,16 +129,20 @@ function exportarXLSX() {
   }
 
   const temExportados = exportados.length > 0;
+  let incluirAnteriores = true;
 
   if (temExportados) {
-    incluirAnteriores = confirm("Deseja também incluir registros já exportados anteriormente? Se sim, confirme. Caso não queira, clique em cancelar.");
+    incluirAnteriores = confirm("Deseja incluir registros já exportados?");
   }
 
-  let registrosParaExportar = incluirAnteriores
-    ? [...exportados, ...registros]
-    : [...registros];
+  let registrosParaExportar;
 
-  if (!incluirAnteriores) exportados = [];
+  if (incluirAnteriores) {
+    registrosParaExportar = [...exportados, ...registros];
+  } else {
+    registrosParaExportar = [...registros];
+    exportados = []; // limpa os antigos
+  }
 
   const dados = [
     [
@@ -161,8 +152,10 @@ function exportarXLSX() {
       'Caminhão',
       'Origem',
       'Hora Inicial',
+      'Km Inicial',
       'Destino',
       'Hora Final',
+      'Km Final',
       'Observação'
     ],
     ...registrosParaExportar.map(r => [
@@ -172,8 +165,10 @@ function exportarXLSX() {
       r.placa || '',
       r.origem || '',
       r.horaInicial || '',
+      r.kmInicial || '',
       r.destino || '',
       r.horaFinal || '',
+      r.kmFinal || '',
       r.observacao || ''
     ])
   ];
@@ -195,9 +190,11 @@ function exportarXLSX() {
   XLSX.utils.book_append_sheet(wb, ws, "Registros");
   XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
 
+  // Atualiza os registros exportados
   exportados = [...exportados, ...registros];
   localStorage.setItem('exportados', JSON.stringify(exportados));
 
+  // Limpa os registros atuais
   registros = [];
   localStorage.setItem('registros', JSON.stringify(registros));
 
