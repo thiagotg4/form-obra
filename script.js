@@ -24,10 +24,10 @@ function abrirFormulario(tipo) {
       if (result) {
         const texto = result.getText();
         document.getElementById('placa-retirada').value = texto;
-        preencherDataHora('dataRetirada', 'horaInicial');
+        setTimeout(() => preencherDataHora('dataRetirada', 'horaInicial'), 100); // aguarda elementos renderizarem
       }
     });
-  } else {
+  } else if (tipo === 'macico') {
     limparFormularioMacico();
     document.getElementById('form-macico').classList.remove('hidden');
     leitorMacico = new ZXing.BrowserQRCodeReader();
@@ -35,11 +35,12 @@ function abrirFormulario(tipo) {
       if (result) {
         const texto = result.getText();
         document.getElementById('placa-macico').value = texto;
-        preencherDataHora('dataMacico', 'horaFinal');
+        setTimeout(() => preencherDataHora('dataMacico', 'horaFinal'), 100);
       }
     });
   }
 }
+
 
 function preencherDataHora(idData, idHora) {
   const agora = new Date();
