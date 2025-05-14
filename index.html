@@ -12,37 +12,31 @@
       padding: 1rem;
       background: #f5f5f5;
     }
-
     .hidden {
       display: none;
     }
-
-    button, select, input, textarea {
+    button, select, input, textarea, datalist {
       display: block;
       margin: 1rem 0;
       width: 100%;
       padding: 0.5rem;
       font-size: 1rem;
     }
-
     .entry {
       background: #fff;
       margin-top: 1rem;
       padding: 1rem;
       border-radius: 8px;
     }
-
     video {
       width: 100%;
       max-width: 240px;
       margin: 0 auto 1rem auto;
       display: block;
     }
-
     h1, h2 {
       text-align: center;
     }
-
     .back-button {
       background-color: #ccc;
     }
@@ -63,8 +57,18 @@
     <input type="text" id="placa-retirada" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
     <label>Data</label>
-    <input type="date" id="dataRetirada" required />
-    <input type="text" id="escavadeira" placeholder="Escavadeira" required />
+    <input type="date" id="dataRetirada" readonly style="background:#eee;" />
+
+    <label>Hora Inicial</label>
+    <input type="time" id="horaInicial" readonly style="background:#eee;" />
+
+    <label>Escavadeira</label>
+    <input list="listaEscavadeiras" id="escavadeira" placeholder="Digite a escavadeira" required />
+    <datalist id="listaEscavadeiras">
+      <option value="EHE-001"><option value="EHE-002"><option value="EHE-003">
+      <option value="EHS-001"><option value="EHS-002"><option value="EHS-003">
+      
+    </datalist>
 
     <label>Origem</label>
     <select id="origem-retirada" required>
@@ -72,15 +76,16 @@
       <option value="J1">J1</option>
       <option value="J2">J2</option>
       <option value="J3">J3</option>
+      <option value="J4">J4</option>
     </select>
 
     <label>Destino</label>
-    <input type="text" value="Maçiço" readonly style="background:#eee;" />
+    <select id="destino-retirada" required>
+      <option value="">Selecione</option>
+      <option value="Maçiço">Maçiço</option>
+      <option value="Bota Fora">Bota Fora</option>
+    </select>
 
-    <label>Hora Inicial</label>
-    <input type="time" id="horaInicial" required />
-    <label>KM Inicial</label>
-    <input type="number" id="kmInicial" required />
     <textarea id="obsRetirada" placeholder="Observações (opcional)"></textarea>
 
     <button onclick="salvarRetirada()">Salvar Dados</button>
@@ -88,12 +93,15 @@
   </div>
 
   <div id="form-macico" class="hidden">
-    <h2>Formulário de Chegada ao Maçiço</h2>
+    <h2>Formulário de Chegada</h2>
     <video id="video-macico" autoplay></video>
     <input type="text" id="placa-macico" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
     <label>Data</label>
-    <input type="date" id="dataMacico" required />
+    <input type="date" id="dataMacico" readonly style="background:#eee;" />
+
+    <label>Hora Final</label>
+    <input type="time" id="horaFinal" readonly style="background:#eee;" />
 
     <label>Origem</label>
     <select id="origem-macico" required>
@@ -101,12 +109,8 @@
       <option value="J1">J1</option>
       <option value="J2">J2</option>
       <option value="J3">J3</option>
+      <option value="J4">J4</option>
     </select>
-
-    <label>Hora Final</label>
-    <input type="time" id="horaFinal" required />
-    <label>KM Final</label>
-    <input type="number" id="kmFinal" required />
 
     <button onclick="salvarMacico()">Salvar Dados</button>
     <button class="back-button" onclick="voltarMenu()">Voltar ao Menu</button>
