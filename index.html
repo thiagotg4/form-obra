@@ -1,3 +1,4 @@
+<!-- HTML atualizado -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,9 +13,11 @@
       padding: 1rem;
       background: #f5f5f5;
     }
+
     .hidden {
       display: none;
     }
+
     button, select, input, textarea, datalist {
       display: block;
       margin: 1rem 0;
@@ -22,21 +25,25 @@
       padding: 0.5rem;
       font-size: 1rem;
     }
+
     .entry {
       background: #fff;
       margin-top: 1rem;
       padding: 1rem;
       border-radius: 8px;
     }
+
     video {
       width: 100%;
       max-width: 240px;
       margin: 0 auto 1rem auto;
       display: block;
     }
+
     h1, h2 {
       text-align: center;
     }
+
     .back-button {
       background-color: #ccc;
     }
@@ -57,17 +64,24 @@
     <input type="text" id="placa-retirada" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
     <label>Data</label>
-    <input type="date" id="dataRetirada" readonly style="background:#eee;" />
-
+    <input type="date" id="dataRetirada" readonly style="background:#eee;" required />
+    
     <label>Hora Inicial</label>
-    <input type="time" id="horaInicial" readonly style="background:#eee;" />
-
+    <input type="time" id="horaInicial" readonly style="background:#eee;" required />
+    
     <label>Escavadeira</label>
-    <input list="listaEscavadeiras" id="escavadeira" placeholder="Digite a escavadeira" required />
+    <input type="text" id="escavadeira" list="listaEscavadeiras" placeholder="Escavadeira" required />
     <datalist id="listaEscavadeiras">
-      <option value="EHE-001"><option value="EHE-002"><option value="EHE-003">
-      <option value="EHS-001"><option value="EHS-002"><option value="EHS-003">
-      
+      <!-- EHE -->
+      <option value="EHE-001"><option value="EHE-002"><option value="EHE-003"><option value="EHE-004"><option value="EHE-005">
+      <option value="EHE-006"><option value="EHE-007"><option value="EHE-008"><option value="EHE-009"><option value="EHE-010">
+      <option value="EHE-011"><option value="EHE-012"><option value="EHE-013"><option value="EHE-014"><option value="EHE-015">
+      <option value="EHE-016"><option value="EHE-017"><option value="EHE-018"><option value="EHE-019"><option value="EHE-020">
+      <!-- EHS -->
+      <option value="EHS-001"><option value="EHS-002"><option value="EHS-003"><option value="EHS-004"><option value="EHS-005">
+      <option value="EHS-006"><option value="EHS-007"><option value="EHS-008"><option value="EHS-009"><option value="EHS-010">
+      <option value="EHS-011"><option value="EHS-012"><option value="EHS-013"><option value="EHS-014"><option value="EHS-015">
+      <option value="EHS-016"><option value="EHS-017"><option value="EHS-018"><option value="EHS-019"><option value="EHS-020">
     </datalist>
 
     <label>Origem</label>
@@ -81,7 +95,6 @@
 
     <label>Destino</label>
     <select id="destino-retirada" required>
-      <option value="">Selecione</option>
       <option value="Maçiço">Maçiço</option>
       <option value="Bota Fora">Bota Fora</option>
     </select>
@@ -98,10 +111,10 @@
     <input type="text" id="placa-macico" readonly placeholder="Placa do caminhão (QR Code)" style="background:#eee;" />
 
     <label>Data</label>
-    <input type="date" id="dataMacico" readonly style="background:#eee;" />
+    <input type="date" id="dataMacico" readonly style="background:#eee;" required />
 
     <label>Hora Final</label>
-    <input type="time" id="horaFinal" readonly style="background:#eee;" />
+    <input type="time" id="horaFinal" readonly style="background:#eee;" required />
 
     <label>Origem</label>
     <select id="origem-macico" required>
@@ -110,6 +123,12 @@
       <option value="J2">J2</option>
       <option value="J3">J3</option>
       <option value="J4">J4</option>
+    </select>
+
+    <label>Destino</label>
+    <select id="destino-macico" required>
+      <option value="Maçiço">Maçiço</option>
+      <option value="Bota Fora">Bota Fora</option>
     </select>
 
     <button onclick="salvarMacico()">Salvar Dados</button>
