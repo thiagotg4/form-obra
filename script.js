@@ -1,5 +1,6 @@
 let leitorRetirada, leitorMacico;
 let registros = [];
+let exportados = [];
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
@@ -7,7 +8,9 @@ if ('serviceWorker' in navigator) {
 
 window.onload = () => {
   const salvo = localStorage.getItem('registros');
+  const prev = localStorage.getItem('exportados');
   if (salvo) registros = JSON.parse(salvo);
+  if (prev) exportados = JSON.parse(prev);
 };
 
 function abrirFormulario(tipo) {
@@ -125,6 +128,22 @@ function exportarXLSX() {
     return;
   }
 
+  const temExportados = exportados.length > 0;
+  let incluirAnteriores = true;
+
+  if (temExportados) {
+    incluirAnteriores = confirm("Deseja incluir registros já exportados?");
+  }
+
+  let registrosParaExportar;
+
+  if (incluirAnteriores) {
+    registrosParaExportar = [...exportados, ...registros];
+  } else {
+    registrosParaExportar = [...registros];
+    exportados = []; // limpa os antigos
+  }
+
   const dados = [
     [
       'Tipo de Formulário',
@@ -138,7 +157,7 @@ function exportarXLSX() {
       'Km Final',
       'Observação'
     ],
-    ...registros.map(r => [
+    ...registrosParaExportar.map(r => [
       r.tipo || '',
       r.escavadeira || '',
       r.placa || '',
@@ -155,7 +174,6 @@ function exportarXLSX() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(dados);
 
-  // aplica negrito e fundo cinza na primeira linha
   const range = XLSX.utils.decode_range(ws['!ref']);
   for (let C = range.s.c; C <= range.e.c; ++C) {
     const cell = XLSX.utils.encode_cell({ r: 0, c: C });
@@ -167,7 +185,16 @@ function exportarXLSX() {
   }
 
   ws['!cols'] = Array(dados[0].length).fill({ wch: 20 });
-
   XLSX.utils.book_append_sheet(wb, ws, "Registros");
   XLSX.writeFile(wb, 'registros_caminhoes.xlsx');
+
+  // Atualiza os registros exportados
+  exportados = [...exportados, ...registros];
+  localStorage.setItem('exportados', JSON.stringify(exportados));
+
+  // Limpa os registros atuais
+  registros = [];
+  localStorage.setItem('registros', JSON.stringify(registros));
+
+  alert("Exportação concluída.");
 }
