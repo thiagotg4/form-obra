@@ -147,6 +147,7 @@ function exportarXLSX() {
   const dados = [
     [
       'Tipo de Formulário',
+      'Data',
       'Escavadeira',
       'Caminhão',
       'Origem',
@@ -159,6 +160,7 @@ function exportarXLSX() {
     ],
     ...registrosParaExportar.map(r => [
       r.tipo || '',
+      r.data || '',
       r.escavadeira || '',
       r.placa || '',
       r.origem || '',
