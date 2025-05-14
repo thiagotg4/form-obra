@@ -1,4 +1,3 @@
-<!-- HTML atualizado -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,7 +17,7 @@
       display: none;
     }
 
-    button, select, input, textarea, datalist {
+    button, select, input, textarea, ul {
       display: block;
       margin: 1rem 0;
       width: 100%;
@@ -47,6 +46,27 @@
     .back-button {
       background-color: #ccc;
     }
+
+    #sugestoes-escavadeira {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      background: #fff;
+      position: relative;
+      z-index: 10;
+    }
+
+    #sugestoes-escavadeira li {
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    #sugestoes-escavadeira li:hover {
+      background: #eee;
+    }
   </style>
 </head>
 <body>
@@ -65,24 +85,13 @@
 
     <label>Data</label>
     <input type="date" id="dataRetirada" readonly style="background:#eee;" required />
-    
+
     <label>Hora Inicial</label>
     <input type="time" id="horaInicial" readonly style="background:#eee;" required />
-    
+
     <label>Escavadeira</label>
-    <input type="text" id="escavadeira" list="listaEscavadeiras" placeholder="Escavadeira" required />
-    <datalist id="listaEscavadeiras">
-      <!-- EHE -->
-      <option value="EHE-001"><option value="EHE-002"><option value="EHE-003"><option value="EHE-004"><option value="EHE-005">
-      <option value="EHE-006"><option value="EHE-007"><option value="EHE-008"><option value="EHE-009"><option value="EHE-010">
-      <option value="EHE-011"><option value="EHE-012"><option value="EHE-013"><option value="EHE-014"><option value="EHE-015">
-      <option value="EHE-016"><option value="EHE-017"><option value="EHE-018"><option value="EHE-019"><option value="EHE-020">
-      <!-- EHS -->
-      <option value="EHS-001"><option value="EHS-002"><option value="EHS-003"><option value="EHS-004"><option value="EHS-005">
-      <option value="EHS-006"><option value="EHS-007"><option value="EHS-008"><option value="EHS-009"><option value="EHS-010">
-      <option value="EHS-011"><option value="EHS-012"><option value="EHS-013"><option value="EHS-014"><option value="EHS-015">
-      <option value="EHS-016"><option value="EHS-017"><option value="EHS-018"><option value="EHS-019"><option value="EHS-020">
-    </datalist>
+    <input type="text" id="escavadeira" placeholder="Escavadeira" autocomplete="off" required />
+    <ul id="sugestoes-escavadeira" class="hidden"></ul>
 
     <label>Origem</label>
     <select id="origem-retirada" required>
